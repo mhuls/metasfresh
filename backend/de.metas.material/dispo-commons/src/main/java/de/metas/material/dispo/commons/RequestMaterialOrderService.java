@@ -1,7 +1,15 @@
 package de.metas.material.dispo.commons;
 
+import java.time.Instant;
+import java.util.List;
+
+import org.adempiere.exceptions.AdempiereException;
+import org.compiere.util.TimeUtil;
+import org.springframework.stereotype.Service;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+
 import de.metas.bpartner.BPartnerId;
 import de.metas.common.util.time.SystemTime;
 import de.metas.material.dispo.commons.candidate.Candidate;
@@ -26,12 +34,6 @@ import de.metas.material.event.pporder.PPOrderRequestedEvent;
 import de.metas.material.event.purchase.PurchaseCandidateRequestedEvent;
 import de.metas.util.collections.CollectionUtils;
 import lombok.NonNull;
-import org.adempiere.exceptions.AdempiereException;
-import org.compiere.util.TimeUtil;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.List;
 
 /*
  * #%L
@@ -95,6 +97,9 @@ public class RequestMaterialOrderService
 					break;
 				case PURCHASE:
 					createAndFirePurchaseCandidateRequestedEvent(groupOfCandidates);
+					break;
+				case FORECAST:
+					createAndFireForecastRequestedEvent(groupOfCandidates);
 					break;
 				default:
 					break;
@@ -271,6 +276,24 @@ public class RequestMaterialOrderService
 				.supplyCandidateRepoId(singleCandidate.getId().getRepoId())
 				.salesOrderLineRepoId(singleCandidate.getAdditionalDemandDetail().getOrderLineId())
 				.salesOrderRepoId(singleCandidate.getAdditionalDemandDetail().getOrderId())
+				.build();
+
+		return purchaseCandidateRequestedEvent;
+	}
+	
+	private void createAndFireForecastRequestedEvent(@NonNull final List<Candidate> group)
+	{
+		final PurchaseCandidateRequestedEvent purchaseCandidateRequestedEvent = createForecastRequestedEvent(group);
+		materialEventService.postEventAfterNextCommit(purchaseCandidateRequestedEvent);
+	}
+	
+	private PurchaseCandidateRequestedEvent createForecastRequestedEvent(@NonNull final List<Candidate> group)
+	{
+		final Candidate singleCandidate = CollectionUtils.singleElement(group);
+
+		final PurchaseCandidateRequestedEvent purchaseCandidateRequestedEvent = PurchaseCandidateRequestedEvent.builder()
+				.eventDescriptor(EventDescriptor.ofClientAndOrg(singleCandidate.getClientAndOrgId()))
+				.supplyCandidateRepoId(singleCandidate.getId().getRepoId())
 				.build();
 
 		return purchaseCandidateRequestedEvent;

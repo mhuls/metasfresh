@@ -1,25 +1,20 @@
 package de.metas.document.engine.impl;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Suppliers;
-import com.google.common.collect.ImmutableMap;
-import de.metas.document.DocTypeId;
-import de.metas.document.IDocTypeDAO;
-import de.metas.document.engine.DocStatus;
-import de.metas.document.engine.DocumentHandler;
-import de.metas.document.engine.DocumentHandlerProvider;
-import de.metas.document.engine.DocumentTableFields;
-import de.metas.document.engine.DocumentWrapper;
-import de.metas.document.engine.IDocument;
-import de.metas.document.engine.IDocumentBL;
-import de.metas.document.exceptions.DocumentProcessingException;
-import de.metas.logging.LogManager;
-import de.metas.monitoring.adapter.NoopPerformanceMonitoringService;
-import de.metas.monitoring.adapter.PerformanceMonitoringService;
-import de.metas.util.Check;
-import de.metas.util.GuavaCollectors;
-import de.metas.util.Services;
-import lombok.NonNull;
+import static org.adempiere.model.InterfaceWrapperHelper.getTrxName;
+import static org.adempiere.model.InterfaceWrapperHelper.setTrxName;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
+
 import org.adempiere.ad.service.IADReferenceDAO;
 import org.adempiere.ad.service.IADReferenceDAO.ADRefListItem;
 import org.adempiere.ad.trx.api.ITrx;
@@ -38,19 +33,27 @@ import org.compiere.util.TimeUtil;
 import org.compiere.util.TrxRunnable;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import com.google.common.base.Objects;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.ImmutableMap;
 
-import static org.adempiere.model.InterfaceWrapperHelper.getTrxName;
-import static org.adempiere.model.InterfaceWrapperHelper.setTrxName;
+import de.metas.document.DocTypeId;
+import de.metas.document.IDocTypeDAO;
+import de.metas.document.engine.DocStatus;
+import de.metas.document.engine.DocumentHandler;
+import de.metas.document.engine.DocumentHandlerProvider;
+import de.metas.document.engine.DocumentTableFields;
+import de.metas.document.engine.DocumentWrapper;
+import de.metas.document.engine.IDocument;
+import de.metas.document.engine.IDocumentBL;
+import de.metas.document.exceptions.DocumentProcessingException;
+import de.metas.logging.LogManager;
+import de.metas.monitoring.adapter.NoopPerformanceMonitoringService;
+import de.metas.monitoring.adapter.PerformanceMonitoringService;
+import de.metas.util.Check;
+import de.metas.util.GuavaCollectors;
+import de.metas.util.Services;
+import lombok.NonNull;
 
 public abstract class AbstractDocumentBL implements IDocumentBL
 {
@@ -180,7 +183,7 @@ public abstract class AbstractDocumentBL implements IDocumentBL
 		// is a different instance. If we save 'document' in that case, the changes to 'doc' will be lost.
 		final Object documentModel = doc.getDocumentModel();
 		InterfaceWrapperHelper.save(documentModel);
-		InterfaceWrapperHelper.refresh(document);
+		InterfaceWrapperHelper.refresh(documentModel);
 
 		if (expectedDocStatus != null && !expectedDocStatus.equals(doc.getDocStatus()))
 		{
