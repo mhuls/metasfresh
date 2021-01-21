@@ -7,6 +7,7 @@ import static org.adempiere.model.InterfaceWrapperHelper.save;
 import static org.adempiere.model.InterfaceWrapperHelper.saveRecord;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import de.metas.common.rest_api.JsonOrganisation;
 import org.adempiere.ad.table.MockLogEntriesRepository;
 import org.adempiere.ad.trx.api.ITrx;
 import org.adempiere.ad.wrapper.POJOLookupMap;
@@ -48,7 +49,7 @@ import de.metas.rest_api.common.JsonExternalId;
 import de.metas.rest_api.common.SyncAdvise;
 import de.metas.rest_api.common.SyncAdvise.IfExists;
 import de.metas.rest_api.common.SyncAdvise.IfNotExists;
-import de.metas.rest_api.ordercandidates.request.JsonOrganization;
+import de.metas.rest_api.ordercandidates.request.JsonOrgAndBPartner;
 import de.metas.rest_api.ordercandidates.request.JsonRequestBPartnerLocationAndContact;
 import de.metas.rest_api.utils.BPartnerQueryService;
 import de.metas.security.PermissionService;
@@ -87,7 +88,7 @@ public class MasterdataProviderTest
 
 	private JsonRequestBPartnerLocationAndContact jsonBPartnerInfo;
 
-	private JsonOrganization jsonOrganization;
+	private JsonOrgAndBPartner jsonOrganization;
 
 	private JsonRequestLocation jsonBPartnerLocation;
 
@@ -162,8 +163,8 @@ public class MasterdataProviderTest
 				.syncAdvise(SyncAdvise.builder().ifNotExists(IfNotExists.CREATE).build())
 				.build();
 
-		jsonOrganization = JsonOrganization.builder()
-				.code("jsonOrganization.code")
+		jsonOrganization = JsonOrgAndBPartner.builder()
+				.org(JsonOrganisation.of("jsonOrganization.code"))
 				.name("jsonOrganization.name")
 				.bpartner(jsonBPartnerInfo)
 				.syncAdvise(SyncAdvise.builder().ifNotExists(IfNotExists.CREATE).build())

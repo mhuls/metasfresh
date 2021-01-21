@@ -6,9 +6,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.metas.common.rest_api.JsonOrganisation;
 import de.metas.rest_api.common.SyncAdvise;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.Value;
 
 /*
@@ -34,26 +36,28 @@ import lombok.Value;
  */
 
 @Value
-public class JsonOrganization
+public class JsonOrgAndBPartner
 {
-	String code;
+	@ApiModelProperty(required = true)
+	JsonOrganisation org;
+
 	String name;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@ApiModelProperty(required = false, value = "Optional bpartner of this organization")
+	@ApiModelProperty(value = "Optional bpartner of this organization")
 	JsonRequestBPartnerLocationAndContact bpartner;
 
 	SyncAdvise syncAdvise;
 
 	@JsonCreator
 	@Builder(toBuilder = true)
-	private JsonOrganization(
-			@JsonProperty("code") final String code,
+	private JsonOrgAndBPartner(
+			@NonNull @JsonProperty("org") final JsonOrganisation org,
 			@JsonProperty("name") final String name,
 			@JsonProperty("syncAdvise") final SyncAdvise syncAdvise,
 			@JsonProperty("bpartner") final JsonRequestBPartnerLocationAndContact bpartner)
 	{
-		this.code = code;
+		this.org = org;
 		this.name = name;
 		this.syncAdvise = coalesce(syncAdvise, SyncAdvise.READ_ONLY);
 		this.bpartner = bpartner;

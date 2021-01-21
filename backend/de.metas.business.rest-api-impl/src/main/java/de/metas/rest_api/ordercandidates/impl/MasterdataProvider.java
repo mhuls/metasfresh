@@ -12,6 +12,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import de.metas.rest_api.common.SyncAdvise;
+import de.metas.common.rest_api.JsonOrganisation;
 import org.adempiere.ad.trx.api.ITrxManager;
 import org.adempiere.warehouse.WarehouseId;
 import org.adempiere.warehouse.api.IWarehouseDAO;
@@ -55,7 +56,7 @@ import de.metas.rest_api.exception.MissingResourceException;
 import de.metas.rest_api.ordercandidates.impl.ProductMasterDataProvider.ProductInfo;
 import de.metas.rest_api.ordercandidates.request.JSONPaymentRule;
 import de.metas.rest_api.ordercandidates.request.JsonOLCandCreateRequest;
-import de.metas.rest_api.ordercandidates.request.JsonOrganization;
+import de.metas.rest_api.ordercandidates.request.JsonOrgAndBPartner;
 import de.metas.rest_api.ordercandidates.request.JsonProductInfo;
 import de.metas.rest_api.ordercandidates.request.JsonRequestBPartnerLocationAndContact;
 import de.metas.rest_api.utils.IdentifierString;
@@ -138,19 +139,19 @@ final class MasterdataProvider
 		return warehousesRepo.getWarehouseIdByValue(warehouseCode);
 	}
 
-	public OrgId getCreateOrgIdInTrx(@Nullable final JsonOrganization json)
+	public OrgId getCreateOrgIdInTrx(@Nullable final JsonOrgAndBPartner json)
 	{
 		if (json == null)
 		{
 			return permissionService.getDefaultOrgId();
 		}
 
-		return orgIdsByCode.compute(json.getCode(), (code, existingOrgId) -> createOrUpdateOrgIdInTrx(json, existingOrgId));
+		return orgIdsByCode.compute(json.getOrg().getCode(), (code, existingOrgId) -> createOrUpdateOrgIdInTrx(json, existingOrgId));
 	}
 
 	@VisibleForTesting
 	OrgId createOrUpdateOrgIdInTrx(
-			@NonNull final JsonOrganization json,
+			@NonNull final JsonOrgAndBPartner json,
 			@Nullable final OrgId existingOrgId)
 	{
 		final I_AD_Org orgRecord = trxManager.callInNewTrx(() -> createOrUpdateOrgIdInTrx0(json, existingOrgId));
@@ -176,13 +177,13 @@ final class MasterdataProvider
 		return orgId;
 	}
 
-	private I_AD_Org createOrUpdateOrgIdInTrx0(@NonNull final JsonOrganization json, @Nullable OrgId existingOrgId)
+	private I_AD_Org createOrUpdateOrgIdInTrx0(@NonNull final JsonOrgAndBPartner json, @Nullable OrgId existingOrgId)
 	{
 		final SyncAdvise orgSyncAdvise = json.getSyncAdvise();
 
 		if (existingOrgId == null)
 		{
-			final String code = json.getCode();
+			final String code = json.getOrg().getCode();
 			if (Check.isEmpty(code, true))
 			{
 				throw new MissingPropertyException("JsonOrganization.code", json);
@@ -221,13 +222,13 @@ final class MasterdataProvider
 		return orgRecord;
 	}
 
-	private void updateOrgRecord(@NonNull final I_AD_Org orgRecord, @NonNull final JsonOrganization json)
+	private void updateOrgRecord(@NonNull final I_AD_Org orgRecord, @NonNull final JsonOrgAndBPartner json)
 	{
-		orgRecord.setValue(json.getCode());
+		orgRecord.setValue(json.getOrg().getCode());
 		orgRecord.setName(json.getName());
 	}
 
-	public JsonOrganization getJsonOrganizationById(final OrgId orgId)
+	public JsonOrgAndBPartner getJsonOrganizationById(final OrgId orgId)
 	{
 		final I_AD_Org orgRecord = orgDAO.getById(orgId);
 		if (orgRecord == null)
@@ -235,8 +236,8 @@ final class MasterdataProvider
 			return null;
 		}
 
-		return JsonOrganization.builder()
-				.code(orgRecord.getValue())
+		return JsonOrgAndBPartner.builder()
+				.org(JsonOrganisation.of(orgRecord.getValue()))
 				.name(orgRecord.getName())
 				.build();
 	}

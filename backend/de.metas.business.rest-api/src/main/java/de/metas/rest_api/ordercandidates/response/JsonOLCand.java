@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import de.metas.rest_api.ordercandidates.request.JsonOrganization;
+import de.metas.rest_api.ordercandidates.request.JsonOrgAndBPartner;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Value;
@@ -45,7 +45,7 @@ public class JsonOLCand
 	private String poReference;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private JsonOrganization org;
+	private JsonOrgAndBPartner org;
 
 	private JsonResponseBPartnerLocationAndContact bpartner;
 
@@ -96,7 +96,7 @@ public class JsonOLCand
 			@JsonProperty("externalLineId") final String externalLineId,
 			@JsonProperty("externalHeaderId") final String externalHeaderId,
 			@JsonProperty("poReference") final String poReference,
-			@JsonProperty("org") final JsonOrganization org,
+			@JsonProperty("org") final JsonOrgAndBPartner org,
 			@JsonProperty("bpartner") final JsonResponseBPartnerLocationAndContact bpartner,
 			@JsonProperty("billBPartner") final JsonResponseBPartnerLocationAndContact billBPartner,
 			@JsonProperty("dropShipBPartner") final JsonResponseBPartnerLocationAndContact dropShipBPartner,

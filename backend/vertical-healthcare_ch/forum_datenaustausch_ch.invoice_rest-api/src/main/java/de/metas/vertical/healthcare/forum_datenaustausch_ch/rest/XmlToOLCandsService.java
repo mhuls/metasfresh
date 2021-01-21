@@ -18,6 +18,7 @@ import java.util.StringJoiner;
 import javax.annotation.Nullable;
 import javax.xml.bind.JAXBElement;
 
+import de.metas.common.rest_api.JsonOrganisation;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.X_C_DocType;
 import org.compiere.util.TimeUtil;
@@ -43,7 +44,7 @@ import de.metas.rest_api.ordercandidates.request.BPartnerLookupAdvise;
 import de.metas.rest_api.ordercandidates.request.JsonOLCandCreateBulkRequest;
 import de.metas.rest_api.ordercandidates.request.JsonOLCandCreateRequest;
 import de.metas.rest_api.ordercandidates.request.JsonOLCandCreateRequest.JsonOLCandCreateRequestBuilder;
-import de.metas.rest_api.ordercandidates.request.JsonOrganization;
+import de.metas.rest_api.ordercandidates.request.JsonOrgAndBPartner;
 import de.metas.rest_api.ordercandidates.request.JsonProductInfo;
 import de.metas.rest_api.ordercandidates.request.JsonProductInfo.Type;
 import de.metas.rest_api.ordercandidates.request.JsonRequestBPartnerLocationAndContact;
@@ -391,7 +392,7 @@ public class XmlToOLCandsService
 			@NonNull final BodyType body,
 			@NonNull final HighLevelContext context)
 	{
-		final JsonOrganization billerOrgInfo = createBillerOrg(
+		final JsonOrgAndBPartner billerOrgInfo = createBillerOrg(
 				getBiller(body),
 				context);
 		requestBuilder.org(billerOrgInfo);
@@ -586,16 +587,16 @@ public class XmlToOLCandsService
 		return patientName;
 	}
 
-	private JsonOrganization createBillerOrg(
+	private JsonOrgAndBPartner createBillerOrg(
 			@NonNull final BillerAddressType biller,
 			@NonNull final HighLevelContext context)
 	{
 		final Name name = createName(biller);
 
-		final JsonOrganization org = JsonOrganization
+		final JsonOrgAndBPartner org = JsonOrgAndBPartner
 				.builder()
 				.syncAdvise(context.getBillerSyncAdvise())
-				.code(createBPartnerExternalId(biller).getValue())
+				.org(JsonOrganisation.of(createBPartnerExternalId(biller).getValue()))
 				.name(name.getSingleStringName())
 				.bpartner(createJsonBPartnerInfo(biller, context))
 				.build();

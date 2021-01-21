@@ -54,7 +54,7 @@ import lombok.Value;
 @Value
 public final class JsonOLCandCreateRequest
 {
-	private JsonOrganization org;
+	private JsonOrgAndBPartner org;
 
 	@ApiModelProperty( //
 			required = true, //
@@ -229,7 +229,7 @@ public final class JsonOLCandCreateRequest
 	@JsonCreator
 	@Builder(toBuilder = true)
 	private JsonOLCandCreateRequest(
-			@JsonProperty("org") final JsonOrganization org,
+			@JsonProperty("org") final JsonOrgAndBPartner org,
 			@JsonProperty("externalLineId") final String externalLineId,
 			@JsonProperty("externalHeaderId") final String externalHeaderId,
 			@JsonProperty("dataSource") final @NonNull String dataSource,
